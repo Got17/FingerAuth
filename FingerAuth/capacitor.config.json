@@ -1,0 +1,5 @@
+{
+  "appId": "com.authapp.app",
+  "appName": "AuthApp",
+  "webDir": "wwwroot/dist"
+}

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35122.118
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FingerAuth", "FingerAuth\FingerAuth.fsproj", "{F43111E0-8288-4227-BBCC-4E18C48C2589}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F43111E0-8288-4227-BBCC-4E18C48C2589}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F43111E0-8288-4227-BBCC-4E18C48C2589}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F43111E0-8288-4227-BBCC-4E18C48C2589}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F43111E0-8288-4227-BBCC-4E18C48C2589}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B9AEBF54-F9D6-4692-B3C1-A342151274F3}
+	EndGlobalSection
+EndGlobal

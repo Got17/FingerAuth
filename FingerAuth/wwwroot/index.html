@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>FingerAuth</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+    <style>
+        /* Don't show the not-yet-loaded templates */
+        [ws-template], [ws-children-template] {
+            display: none;
+        }
+    </style>
+    <script type="module" src="Content/FingerAuth.head.js"></script>
+</head>
+<body>
+    <h1 class="pic-note-header">PicNote App</h1>
+    <div id="main" ws-children-template="PicNote">
+        <div class="capture-button">
+            <button id="captureBtn" ws-onclick="CaptureBtn">Capture Image</button>
+        </div>
+        <br />
+        <div class="canvas-container">
+            <canvas id="annotationCanvas" width="300" height="400" ws-hole="canvas"
+                    ws-onmouseDown="canvasMouseDown" ws-onmouseup="canvasMouseUp"
+                    ws-onmouseout="canvasMouseOut" ws-onmousemove="canvasMouseMove"
+                    ws-onafterrender="canvasInit"></canvas>
+        </div>
+        <div class="save-sahre-button">
+            <button id="saveShareBtn" ws-onclick="SaveShareBtn">Save & Share</button>
+        </div>
+    </div>
+
+    <script type="module" src="Content/FingerAuth.min.js"></script>
+    <script type="module"
+            src="https://unpkg.com/@ionic/pwa-elements@latest/dist/ionicpwaelements/ionicpwaelements.esm.js"></script>
+    <script nomodule
+            src="https://unpkg.com/@ionic/pwa-elements@latest/dist/ionicpwaelements/ionicpwaelements.js"></script>
+</body>
+</html>
