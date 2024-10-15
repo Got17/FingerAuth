@@ -15,8 +15,10 @@
 </head>
 <body>
     <h1 class="pic-note-header">PicNote App</h1>
+    <div id="text" ws-children-template="textAuth">
+        <p ws-hole="textAuthenticate"></p>
+    </div>
     <div id="main" ws-children-template="PicNote">
-        <p ws-hole="text"></p>
         <div class="capture-button">
             <button id="captureBtn" ws-onclick="CaptureBtn">Capture Image</button>
         </div>

@@ -199,8 +199,8 @@ module Client =
             |> Doc.RunById "main"   
 
         else 
-            IndexTemplate.PicNote()
-                .text("Please authenticate")
+            IndexTemplate.textAuth()
+                .textAuthenticate("Please authenticate")
                 .Doc()
-            |> Doc.RunById "main"
+            |> Doc.RunById "text"
              
