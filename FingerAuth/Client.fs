@@ -36,7 +36,7 @@ module Client =
             printfn($"Authentication failed: {error}")
             Capacitor.Dialog.Alert(Dialog.AlertOptions(
                 Title = "Alert",
-                Message = "Authentication is required to use the app."
+                Message = $"Authentication failed: {error}"
             ))|> ignore            
     }
      
@@ -125,7 +125,10 @@ module Client =
             Var.Set lastX <| offsetX
             Var.Set lastY <| offsetY
 
-        authenticateUser(authenticated) |> ignore
+        async {
+            return! authenticateUser(authenticated).AsAsync()
+        }
+        |> Async.StartImmediate
 
         if (authenticated.Value) then
             IndexTemplate.PicNote()
