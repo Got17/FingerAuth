@@ -15,9 +15,8 @@ module Client =
 
     let canvas() = As<HTMLCanvasElement>(JS.Document.GetElementById("annotationCanvas"))
     let getContext (e: Dom.EventTarget) = As<HTMLCanvasElement>(e).GetContext("2d")
-    let mutable authenticated = false
 
-    let authenticateUser() = promise {
+    let authenticateUser(authenticate: Var<bool>) = promise {
         try
             let! checkBioResult = Capacitor.BiometricAuth.CheckBiometry();
             if(checkBioResult.IsAvailable = false) then
@@ -29,10 +28,12 @@ module Client =
                 AndroidSubtitle = "Use your fingerprint to access the app",
                 AllowDeviceCredential = true
             )) |> ignore
-            authenticated <- true
+
+            Var.Set authenticate <| true
 
         with ex ->
-            printfn($"Authentication failed: {ex}")
+            let error = ex |> As<BiometricAuth.BiometryErrorType> 
+            printfn($"Authentication failed: {error}")
             Capacitor.Dialog.Alert(Dialog.AlertOptions(
                 Title = "Alert",
                 Message = "Authentication is required to use the app."
@@ -111,6 +112,7 @@ module Client =
     let Main () =
         let isDrawing = Var.Create false
         let lastX, lastY = Var.Create 0.0, Var.Create 0.0   
+        let authenticated = Var.Create false
         
         let draw (e: Dom.EventTarget, offsetX, offsetY) =
             let ctx = getContext e
@@ -123,75 +125,82 @@ module Client =
             Var.Set lastX <| offsetX
             Var.Set lastY <| offsetY
 
-        authenticateUser() |> ignore
+        authenticateUser(authenticated) |> ignore
 
-        IndexTemplate.PicNote()
-            .CaptureBtn(fun _ -> 
-                async {
-                    return! takePicture().Then(fun _ -> printfn "Succesfully take or choose a picture").AsAsync()
-                }
-                |> Async.Start
-            )
-            .canvasMouseDown(fun e ->
-                Var.Set isDrawing <| true
-                Var.Set lastX <| (e.Event.OffsetX)
-                Var.Set lastY <| (e.Event.OffsetY)
-            )
-            .canvasMouseUp(fun _ -> 
-                MouseUpAndOutAction(isDrawing)
-            )
-            .canvasMouseOut(fun _ ->
-                MouseUpAndOutAction(isDrawing)
-            )
-            .canvasMouseMove(fun e -> 
-                let offsetX = e.Event.OffsetX
-                let offsetY = e.Event.OffsetY
-
-                if isDrawing.Value then
-                    draw (e.Target, offsetX, offsetY)
-            )
-            .SaveShareBtn(fun _ -> 
-                async {
-                    return! saveAndShareImage().Then(fun image -> printfn $"Saved Image URL: {image.Uri}").AsAsync()
-                }
-                |> Async.Start
-            )
-            .canvasInit(fun () ->
-                let canvas = canvas()
-                canvas.AddEventListener("touchstart", fun (e: Dom.Event) -> 
-                    let touchEvent = e |> As<TouchEvent>
-                    touchEvent.PreventDefault()
-
-                    Var.Set isDrawing <| true
-
-                    let touch = touchEvent.Touches[0]
-
-                    let offsetX = setOffsetX(touch)
-                    let offsetY = setOffsetY(touch)
-
-                    Var.Set lastX <| offsetX
-                    Var.Set lastY <| offsetY
+        if (authenticated.Value) then
+            IndexTemplate.PicNote()
+                .CaptureBtn(fun _ -> 
+                    async {
+                        return! takePicture().Then(fun _ -> printfn "Succesfully take or choose a picture").AsAsync()
+                    }
+                    |> Async.Start
                 )
-
-                canvas.AddEventListener("touchmove", fun (e: Dom.Event) -> 
-                    let touchEvent = e |> As<TouchEvent>
-                    touchEvent.PreventDefault()
-
-                    let touch = touchEvent.Touches[0]
-
-                    let offsetX = setOffsetX(touch)
-                    let offsetY = setOffsetY(touch)
+                .canvasMouseDown(fun e ->
+                    Var.Set isDrawing <| true
+                    Var.Set lastX <| (e.Event.OffsetX)
+                    Var.Set lastY <| (e.Event.OffsetY)
+                )
+                .canvasMouseUp(fun _ -> 
+                    MouseUpAndOutAction(isDrawing)
+                )
+                .canvasMouseOut(fun _ ->
+                    MouseUpAndOutAction(isDrawing)
+                )
+                .canvasMouseMove(fun e -> 
+                    let offsetX = e.Event.OffsetX
+                    let offsetY = e.Event.OffsetY
 
                     if isDrawing.Value then
-                        draw(e.Target, offsetX, offsetY)
+                        draw (e.Target, offsetX, offsetY)
                 )
+                .SaveShareBtn(fun _ -> 
+                    async {
+                        return! saveAndShareImage().Then(fun image -> printfn $"Saved Image URL: {image.Uri}").AsAsync()
+                    }
+                    |> Async.Start
+                )
+                .canvasInit(fun () ->
+                    let canvas = canvas()
+                    canvas.AddEventListener("touchstart", fun (e: Dom.Event) -> 
+                        let touchEvent = e |> As<TouchEvent>
+                        touchEvent.PreventDefault()
 
-                canvas.AddEventListener("touchend", fun (e: Dom.Event) -> 
-                    let touchEvent = e |> As<TouchEvent>
-                    touchEvent.PreventDefault()
-                    Var.Set isDrawing <| false
+                        Var.Set isDrawing <| true
+
+                        let touch = touchEvent.Touches[0]
+
+                        let offsetX = setOffsetX(touch)
+                        let offsetY = setOffsetY(touch)
+
+                        Var.Set lastX <| offsetX
+                        Var.Set lastY <| offsetY
+                    )
+
+                    canvas.AddEventListener("touchmove", fun (e: Dom.Event) -> 
+                        let touchEvent = e |> As<TouchEvent>
+                        touchEvent.PreventDefault()
+
+                        let touch = touchEvent.Touches[0]
+
+                        let offsetX = setOffsetX(touch)
+                        let offsetY = setOffsetY(touch)
+
+                        if isDrawing.Value then
+                            draw(e.Target, offsetX, offsetY)
+                    )
+
+                    canvas.AddEventListener("touchend", fun (e: Dom.Event) -> 
+                        let touchEvent = e |> As<TouchEvent>
+                        touchEvent.PreventDefault()
+                        Var.Set isDrawing <| false
+                    )
                 )
-            )
-            .Doc()
-        |> Doc.RunById "main"   
+                .Doc()
+            |> Doc.RunById "main"   
+
+        else 
+            IndexTemplate.PicNote()
+                .text("Please authenticate")
+                .Doc()
+            |> Doc.RunById "main"
              
