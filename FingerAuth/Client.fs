@@ -89,7 +89,7 @@ module Client =
 
         Capacitor.Share.Share(Share.ShareOptions(
             Title = "Check out my annotated picture!",
-            Text = "Here is an image I created using PicNote!",
+            Text = "Here is an image I created using PicDraw!",
             Url = savedImage.Uri,
             DialogTitle = "Share your creation"
         )) |> ignore
@@ -135,8 +135,8 @@ module Client =
             Var.Set lastX <| offsetX
             Var.Set lastY <| offsetY
 
-        if (isAuthenticated) then
-            IndexTemplate.PicNote()
+        if isAuthenticated = true then
+            IndexTemplate.PicDraw()
                 .CaptureBtn(fun _ -> 
                     async {
                         return! takePicture().Then(fun _ -> printfn "Succesfully take or choose a picture").AsAsync()
@@ -212,7 +212,7 @@ module Client =
                 .authenticate(fun _ -> 
                     async {
                         return! authenticateUser().Then(fun _ -> 
-                            if (isAuthenticated) then
+                            if isAuthenticated = true then
                                 authenticateToast()
                         ).AsAsync()
                     }

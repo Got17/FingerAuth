@@ -14,12 +14,12 @@
     <script type="module" src="Content/FingerAuth.head.js"></script>
 </head>
 <body>
-    <h1 class="pic-note-header">PicNote App</h1>
+    <h1>PicDraw App</h1>
     <div id="text" ws-children-template="textAuth">
         <p ws-hole="textAuthenticate"></p>
         <button ws-onclick="authenticate">Authenticate</button>
     </div>
-    <div id="main" ws-children-template="PicNote">
+    <div id="main" ws-children-template="PicDraw">
         <div class="capture-button">
             <button id="captureBtn" ws-onclick="CaptureBtn">Capture Image</button>
         </div>
@@ -30,7 +30,7 @@
                     ws-onmouseout="canvasMouseOut" ws-onmousemove="canvasMouseMove"
                     ws-onafterrender="canvasInit"></canvas>
         </div>
-        <div class="save-sahre-button">
+        <div class="save-share-button">
             <button id="saveShareBtn" ws-onclick="SaveShareBtn">Save & Share</button>
         </div>
     </div>
