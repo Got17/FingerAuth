@@ -4,10 +4,24 @@ body {
     font-family: sans-serif
 }
 
+a {
+    text-decoration: none;
+    color: whitesmoke;
+}
+
+.pic-draw-header {
+    display: block;
+    font-size: 2em;
+    margin-top: 0.67em;
+    margin-bottom: 0.67em;
+    margin-left: 0;
+    margin-right: 0;
+    font-weight: bold;
+}
+
 #main {
     display: flex;
-    flex-direction:column;
-    
+    flex-direction: column;
 }
 
 .canvas-container {
@@ -18,8 +32,18 @@ body {
     
 }
 
+.authenticate-text {
+    display: block;
+    font-size: 1.17em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    margin-left: 0;
+    margin-right: 0;
+}
+
 #captureBtn,
-#saveShareBtn {
+#saveShareBtn,
+.authenticate-button {
     font-size: 18px;
     font-family: sans-serif;
     letter-spacing: 2px;
@@ -30,5 +54,23 @@ body {
     height: 5%;
     background-color: #0f43f1;
     padding: 10px;
-    color: white
+    color: white;
+    cursor:pointer
 }
+
+#captureBtn:hover,
+#saveShareBtn:hover,
+.authenticate-button:hover,
+#captureBtn:focus,
+#saveShareBtn:focus,
+.authenticate-button:focus {
+    opacity: 0.7;
+}
+
+    #captureBtn:active,
+    #saveShareBtn:active,
+    .authenticate-button:active {
+        opacity: 0.4;
+    }
+
+

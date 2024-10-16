@@ -8,23 +8,28 @@ open WebSharper.UI.Client
 open WebSharper.UI.Templating
 open WebSharper.Capacitor
 open WebSharper.TouchEvents
+open WebSharper.Sitelets
+open WebSharper.UI.Notation
 
-[<JavaScript>]
-module Client =
-    type IndexTemplate = Template<"wwwroot/index.html", ClientLoad.FromDocument>
+type IndexTemplate = Template<"wwwroot/index.html", ClientLoad.FromDocument>
 
+type EndPoint = 
+    | [<EndPoint "/">] Home
+    | [<EndPoint "/picdraw">] PicDraw
+
+
+[<JavaScript; AutoOpen>]
+module Logic =
     let canvas() = As<HTMLCanvasElement>(JS.Document.GetElementById("annotationCanvas"))
     let getContext (e: Dom.EventTarget) = As<HTMLCanvasElement>(e).GetContext("2d")
-    let mutable isAuthenticated = false
+    let isAuthenticated = Var.Create false
+    let toPicDrawPage = Var.Create ""
 
     let authenticateToast() = 
-        async {
-            return! Capacitor.Toast.Show(Toast.ShowOptions(
-                        text = "Authenticate Successfully",
-                        Duration = "short"
-                    )).AsAsync()
-        }
-        |> Async.StartImmediate
+        Capacitor.Toast.Show(Toast.ShowOptions(
+            text = "Authenticate Successfully",
+            Duration = "short"
+        ))
 
     let authenticateUser() = promise {
         try
@@ -32,24 +37,29 @@ module Client =
             if(checkBioResult.IsAvailable = false) then
                 printfn("Biometric authentication not available on this device.");
 
-            else                 
+            else      
                 Capacitor.BiometricAuth.Authenticate(BiometricAuth.AuthenticateOptions(
                     Reason = "Please authenticate to use PicDrawApp",
                     AndroidTitle = "Biometric Authentication",
                     AndroidSubtitle = "Use your fingerprint to access the app",
                     AllowDeviceCredential = true
                 )) |> ignore
-                isAuthenticated <- true
+
+                isAuthenticated := true
+                authenticateToast() |> ignore
+
+                toPicDrawPage := "/#/picdraw"
+                JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore            
 
         with ex ->
             let error = ex |> As<BiometricAuth.BiometryErrorType> 
             printfn($"Authentication failed: {error}")
             Capacitor.Dialog.Alert(Dialog.AlertOptions(
                 Title = "Alert",
-                Message = $"Authentication failed: {error}"
+                Message = $"{error}"
             ))|> ignore            
     }
-     
+ 
     let loadImageOnCanvas (imagePath: string) =
         let img = 
             Elt.img [
@@ -73,8 +83,8 @@ module Client =
     } 
 
     let MouseUpAndOutAction (isDrawing) = 
-        Var.Set isDrawing <| false            
-    
+        isDrawing := false            
+
     let saveAndShareImage () = promise {
         let date = new Date()
         let canvas = canvas()
@@ -115,16 +125,15 @@ module Client =
 
         let scaleY = intTofloat(canvas.Height) / rect.Height
         let offsetY = (touch.ClientY - rect.Top) * scaleY
-        
+    
         offsetY
 
-    [<SPAEntryPoint>]
-    let Main () =
-        let isDrawing = Var.Create false
-        let lastX, lastY = Var.Create 0.0, Var.Create 0.0   
-(*        let isAuthenticated = Var.Create false*)
-        
-        let draw (e: Dom.EventTarget, offsetX, offsetY) =
+[<JavaScript; AutoOpen>]
+module Pages = 
+    let isDrawing = Var.Create false
+    let lastX, lastY = Var.Create 0.0, Var.Create 0.0   
+
+    let draw (e: Dom.EventTarget, offsetX, offsetY) =
             let ctx = getContext e
             ctx.StrokeStyle <- "#FF0000" 
             ctx.LineWidth <- 2.0 
@@ -132,92 +141,109 @@ module Client =
             ctx.MoveTo(lastX.Value, lastY.Value)
             ctx.LineTo(offsetX, offsetY)
             ctx.Stroke()
-            Var.Set lastX <| offsetX
-            Var.Set lastY <| offsetY
+            lastX := offsetX
+            lastY := offsetY
 
-        if isAuthenticated = true then
-            IndexTemplate.PicDraw()
-                .CaptureBtn(fun _ -> 
-                    async {
-                        return! takePicture().Then(fun _ -> printfn "Succesfully take or choose a picture").AsAsync()
-                    }
-                    |> Async.Start
+    let PicDrawPage() = 
+        IndexTemplate.PicDraw()
+            .CaptureBtn(fun _ -> 
+                async {
+                    return! takePicture().Then(fun _ -> printfn "Succesfully take or choose a picture").AsAsync()
+                }
+                |> Async.Start
+            )
+            .canvasMouseDown(fun e ->
+                isDrawing := true
+                lastX := (e.Event.OffsetX)
+                lastY := (e.Event.OffsetY)
+            )
+            .canvasMouseUp(fun _ -> 
+                MouseUpAndOutAction(isDrawing)
+            )
+            .canvasMouseOut(fun _ ->
+                MouseUpAndOutAction(isDrawing)
+            )
+            .canvasMouseMove(fun e -> 
+                let offsetX = e.Event.OffsetX
+                let offsetY = e.Event.OffsetY
+
+                if isDrawing.Value then
+                    draw (e.Target, offsetX, offsetY)
+            )
+            .SaveShareBtn(fun _ -> 
+                async {
+                    return! saveAndShareImage().Then(fun image -> printfn $"Saved Image URL: {image.Uri}").AsAsync()
+                }
+                |> Async.Start
+            )
+            .canvasInit(fun () ->
+                let canvas = canvas()
+                canvas.AddEventListener("touchstart", fun (e: Dom.Event) -> 
+                    let touchEvent = e |> As<TouchEvent>
+                    touchEvent.PreventDefault()
+
+                    isDrawing := true
+
+                    let touch = touchEvent.Touches[0]
+
+                    let offsetX = setOffsetX(touch)
+                    let offsetY = setOffsetY(touch)
+
+                    lastX := offsetX
+                    lastY := offsetY
                 )
-                .canvasMouseDown(fun e ->
-                    Var.Set isDrawing <| true
-                    Var.Set lastX <| (e.Event.OffsetX)
-                    Var.Set lastY <| (e.Event.OffsetY)
-                )
-                .canvasMouseUp(fun _ -> 
-                    MouseUpAndOutAction(isDrawing)
-                )
-                .canvasMouseOut(fun _ ->
-                    MouseUpAndOutAction(isDrawing)
-                )
-                .canvasMouseMove(fun e -> 
-                    let offsetX = e.Event.OffsetX
-                    let offsetY = e.Event.OffsetY
+
+                canvas.AddEventListener("touchmove", fun (e: Dom.Event) -> 
+                    let touchEvent = e |> As<TouchEvent>
+                    touchEvent.PreventDefault()
+
+                    let touch = touchEvent.Touches[0]
+
+                    let offsetX = setOffsetX(touch)
+                    let offsetY = setOffsetY(touch)
 
                     if isDrawing.Value then
-                        draw (e.Target, offsetX, offsetY)
+                        draw(e.Target, offsetX, offsetY)
                 )
-                .SaveShareBtn(fun _ -> 
-                    async {
-                        return! saveAndShareImage().Then(fun image -> printfn $"Saved Image URL: {image.Uri}").AsAsync()
-                    }
-                    |> Async.Start
+
+                canvas.AddEventListener("touchend", fun (e: Dom.Event) -> 
+                    let touchEvent = e |> As<TouchEvent>
+                    touchEvent.PreventDefault()
+                    isDrawing := false
                 )
-                .canvasInit(fun () ->
-                    let canvas = canvas()
-                    canvas.AddEventListener("touchstart", fun (e: Dom.Event) -> 
-                        let touchEvent = e |> As<TouchEvent>
-                        touchEvent.PreventDefault()
+            )
+            .Doc()    
 
-                        Var.Set isDrawing <| true
+    let HomePage() = 
+        IndexTemplate.textAuth()
+            .authenticate(fun e -> 
+                e.Event.PreventDefault()
+                async {
+                    return! authenticateUser().AsAsync()
+                }
+                |> Async.StartImmediate
+            )      
+            .ToPicDrawPage(toPicDrawPage.V)
+            .Doc()
 
-                        let touch = touchEvent.Touches[0]
+[<JavaScript>]
+module Client =   
+    let router = Router.Infer<EndPoint>()
+    // Install our client-side router and track the current page
+    let currentPage = Router.InstallHash Home router
 
-                        let offsetX = setOffsetX(touch)
-                        let offsetY = setOffsetY(touch)
+    [<SPAEntryPoint>]
+    let Main () =        
+        let renderInnerPage (currentPage: Var<EndPoint>) =
+            currentPage.View.Map (fun endpoint ->
+                match endpoint with        
+                | Home -> HomePage()
+                | PicDraw -> PicDrawPage()
 
-                        Var.Set lastX <| offsetX
-                        Var.Set lastY <| offsetY
-                    )
+            )
+            |> Doc.EmbedView
 
-                    canvas.AddEventListener("touchmove", fun (e: Dom.Event) -> 
-                        let touchEvent = e |> As<TouchEvent>
-                        touchEvent.PreventDefault()
-
-                        let touch = touchEvent.Touches[0]
-
-                        let offsetX = setOffsetX(touch)
-                        let offsetY = setOffsetY(touch)
-
-                        if isDrawing.Value then
-                            draw(e.Target, offsetX, offsetY)
-                    )
-
-                    canvas.AddEventListener("touchend", fun (e: Dom.Event) -> 
-                        let touchEvent = e |> As<TouchEvent>
-                        touchEvent.PreventDefault()
-                        Var.Set isDrawing <| false
-                    )
-                )
-                .Doc()
-            |> Doc.RunById "main"   
-
-        else 
-            IndexTemplate.textAuth()
-                .textAuthenticate("Please authenticate")
-                .authenticate(fun _ -> 
-                    async {
-                        return! authenticateUser().Then(fun _ -> 
-                            if isAuthenticated = true then
-                                authenticateToast()
-                        ).AsAsync()
-                    }
-                    |> Async.StartImmediate
-                )
-                .Doc()
-            |> Doc.RunById "text"
+        IndexTemplate()
+            .PageContent(renderInnerPage currentPage)
+            .Bind()
              

@@ -14,14 +14,15 @@
     <script type="module" src="Content/FingerAuth.head.js"></script>
 </head>
 <body>
-    <h1>PicDraw App</h1>
+    <a class="pic-draw-header" href="/#">PicDraw App</a>
+    <div ws-replace="PageContent"></div>
     <div id="text" ws-children-template="textAuth">
-        <p ws-hole="textAuthenticate"></p>
-        <button ws-onclick="authenticate">Authenticate</button>
+        <p class="authenticate-text">Please authenticate</p>
+        <button role="button" ws-onclick="authenticate" href="${ToPicDrawPage}" class="authenticate-button">Authenticate</button>
     </div>
     <div id="main" ws-children-template="PicDraw">
         <div class="capture-button">
-            <button id="captureBtn" ws-onclick="CaptureBtn">Capture Image</button>
+            <button role="button" id="captureBtn" ws-onclick="CaptureBtn">Capture Image</button>
         </div>
         <br />
         <div class="canvas-container">
@@ -31,7 +32,7 @@
                     ws-onafterrender="canvasInit"></canvas>
         </div>
         <div class="save-share-button">
-            <button id="saveShareBtn" ws-onclick="SaveShareBtn">Save & Share</button>
+            <button role="button" id="saveShareBtn" ws-onclick="SaveShareBtn">Save & Share</button>
         </div>
     </div>
 
