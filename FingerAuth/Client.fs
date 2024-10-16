@@ -16,20 +16,29 @@ module Client =
     let canvas() = As<HTMLCanvasElement>(JS.Document.GetElementById("annotationCanvas"))
     let getContext (e: Dom.EventTarget) = As<HTMLCanvasElement>(e).GetContext("2d")
 
+    let authenticateToast() = 
+        Capacitor.Toast.Show(Toast.ShowOptions(
+            text = "Authenticate Successfully",
+            Duration = "short"
+        ))
+
     let authenticateUser(authenticate: Var<bool>) = promise {
         try
             let! checkBioResult = Capacitor.BiometricAuth.CheckBiometry();
             if(checkBioResult.IsAvailable = false) then
                 printfn("Biometric authentication not available on this device.");
-                
-            Capacitor.BiometricAuth.Authenticate(BiometricAuth.AuthenticateOptions(
-                Reason = "Please authenticate to use PicDrawApp",
-                AndroidTitle = "Biometric Authentication",
-                AndroidSubtitle = "Use your fingerprint to access the app",
-                AllowDeviceCredential = true
-            )) |> ignore
 
-            Var.Set authenticate <| true
+            else                 
+                Capacitor.BiometricAuth.Authenticate(BiometricAuth.AuthenticateOptions(
+                    Reason = "Please authenticate to use PicDrawApp",
+                    AndroidTitle = "Biometric Authentication",
+                    AndroidSubtitle = "Use your fingerprint to access the app",
+                    AllowDeviceCredential = true
+                )) |> ignore
+
+                Var.Set authenticate <| true
+
+                authenticateToast() |> ignore            
 
         with ex ->
             let error = ex |> As<BiometricAuth.BiometryErrorType> 
@@ -126,7 +135,7 @@ module Client =
             Var.Set lastY <| offsetY
 
         async {
-            return! authenticateUser(authenticated).AsAsync()
+            return! authenticateUser(authenticated).Then(fun _ -> printfn "").AsAsync()
         }
         |> Async.StartImmediate
 
@@ -204,6 +213,12 @@ module Client =
         else 
             IndexTemplate.textAuth()
                 .textAuthenticate("Please authenticate")
+                .authenticate(fun _ -> 
+                    async {
+                        return! authenticateUser(authenticated).Then(fun _ -> printfn "").AsAsync()
+                    }
+                    |> Async.StartImmediate
+                )
                 .Doc()
             |> Doc.RunById "text"
              
