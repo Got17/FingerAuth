@@ -15,14 +15,18 @@ module Client =
 
     let canvas() = As<HTMLCanvasElement>(JS.Document.GetElementById("annotationCanvas"))
     let getContext (e: Dom.EventTarget) = As<HTMLCanvasElement>(e).GetContext("2d")
+    let mutable isAuthenticated = false
 
     let authenticateToast() = 
-        Capacitor.Toast.Show(Toast.ShowOptions(
-            text = "Authenticate Successfully",
-            Duration = "short"
-        ))
+        async {
+            return! Capacitor.Toast.Show(Toast.ShowOptions(
+                        text = "Authenticate Successfully",
+                        Duration = "short"
+                    )).AsAsync()
+        }
+        |> Async.StartImmediate
 
-    let authenticateUser(authenticate: Var<bool>) = promise {
+    let authenticateUser() = promise {
         try
             let! checkBioResult = Capacitor.BiometricAuth.CheckBiometry();
             if(checkBioResult.IsAvailable = false) then
@@ -35,10 +39,7 @@ module Client =
                     AndroidSubtitle = "Use your fingerprint to access the app",
                     AllowDeviceCredential = true
                 )) |> ignore
-
-                Var.Set authenticate <| true
-
-                authenticateToast() |> ignore            
+                isAuthenticated <- true
 
         with ex ->
             let error = ex |> As<BiometricAuth.BiometryErrorType> 
@@ -121,7 +122,7 @@ module Client =
     let Main () =
         let isDrawing = Var.Create false
         let lastX, lastY = Var.Create 0.0, Var.Create 0.0   
-        let authenticated = Var.Create false
+(*        let isAuthenticated = Var.Create false*)
         
         let draw (e: Dom.EventTarget, offsetX, offsetY) =
             let ctx = getContext e
@@ -134,12 +135,7 @@ module Client =
             Var.Set lastX <| offsetX
             Var.Set lastY <| offsetY
 
-        async {
-            return! authenticateUser(authenticated).Then(fun _ -> printfn "").AsAsync()
-        }
-        |> Async.StartImmediate
-
-        if (authenticated.Value) then
+        if (isAuthenticated) then
             IndexTemplate.PicNote()
                 .CaptureBtn(fun _ -> 
                     async {
@@ -215,7 +211,10 @@ module Client =
                 .textAuthenticate("Please authenticate")
                 .authenticate(fun _ -> 
                     async {
-                        return! authenticateUser(authenticated).Then(fun _ -> printfn "").AsAsync()
+                        return! authenticateUser().Then(fun _ -> 
+                            if (isAuthenticated) then
+                                authenticateToast()
+                        ).AsAsync()
                     }
                     |> Async.StartImmediate
                 )
