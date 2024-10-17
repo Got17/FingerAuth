@@ -38,18 +38,18 @@ module Logic =
                 printfn("Biometric authentication not available on this device.");
 
             else      
-                Capacitor.BiometricAuth.Authenticate(BiometricAuth.AuthenticateOptions(
+                let! _ = Capacitor.BiometricAuth.Authenticate(BiometricAuth.AuthenticateOptions(
                     Reason = "Please authenticate to use PicDrawApp",
                     AndroidTitle = "Biometric Authentication",
                     AndroidSubtitle = "Use your fingerprint to access the app",
                     AllowDeviceCredential = true
-                )) |> ignore
-
-                isAuthenticated := true
-                authenticateToast() |> ignore
+                ))
 
                 toPicDrawPage := "/#/picdraw"
-                JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore            
+                JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore   
+                
+                isAuthenticated := true
+                authenticateToast() |> ignore
 
         with ex ->
             let error = ex |> As<BiometricAuth.BiometryErrorType> 
