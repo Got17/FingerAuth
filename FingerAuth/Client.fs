@@ -190,7 +190,8 @@ module Logic =
                     AllowDeviceCredential = true
                 )) |> ignore
 
-                loadCredentials()|>ignore                   
+                loadCredentials()|>ignore  
+                login() |> ignore
 
         with 
         | exn ->
