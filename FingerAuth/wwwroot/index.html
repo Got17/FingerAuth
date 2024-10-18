@@ -16,23 +16,37 @@
 <body>
     <a class="pic-draw-header" href="/#">PicDraw App</a>
     <div ws-replace="PageContent"></div>
-    <div id="text" ws-children-template="textAuth">
+    <div id="text" ws-children-template="Home">
         <p class="authenticate-text">Please authenticate</p>
-        <button role="button" ws-onclick="authenticate" href="${ToPicDrawPage}" class="authenticate-button">Authenticate</button>
+        <input id="username" placeholder="Username" ws-var="Username" /><br />
+        <input id="password" type="password" placeholder="Password" ws-var="Password" />
+        <button role="button" ws-onclick="LogIn" href="${ToPicDrawPage}" class="login-button">Log in</button>
+        <button role="button" ws-onclick="BiometricAuthenticate" href="${ToPicDrawPage}" class="authenticate-button">Authorize with Biometric</button>
     </div>
     <div id="main" ws-children-template="PicDraw">
+        <p ws-hole="UsernamePicDraw"></p>
+        <p ws-hole="PasswordPicDraw"></p>
+        <div>Please choose your preferred color. </div>
+        <p class="color-picker">
+            <label for="colorPicker">
+                <input type="color" value="#1DB8CE" id="colorPicker">
+            </label>
+        </p>
         <div class="capture-button">
             <button role="button" id="captureBtn" ws-onclick="CaptureBtn">Capture Image</button>
         </div>
         <br />
         <div class="canvas-container">
-            <canvas id="annotationCanvas" width="300" height="400" ws-hole="canvas"
+            <canvas id="annotationCanvas" width="300" height="300" ws-hole="canvas"
                     ws-onmouseDown="canvasMouseDown" ws-onmouseup="canvasMouseUp"
                     ws-onmouseout="canvasMouseOut" ws-onmousemove="canvasMouseMove"
                     ws-onafterrender="canvasInit"></canvas>
         </div>
         <div class="save-share-button">
             <button role="button" id="saveShareBtn" ws-onclick="SaveShareBtn">Save & Share</button>
+        </div>
+        <div class="logout-container">
+            <a role="button" ws-onclick="LogOut" href="${ToHomePage}" class="logout-button">Log out</a>
         </div>
     </div>
 

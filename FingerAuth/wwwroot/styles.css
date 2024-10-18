@@ -43,7 +43,8 @@ a {
 
 #captureBtn,
 #saveShareBtn,
-.authenticate-button {
+.authenticate-button,
+.login-button {
     font-size: 18px;
     font-family: sans-serif;
     letter-spacing: 2px;
@@ -55,22 +56,67 @@ a {
     background-color: #0f43f1;
     padding: 10px;
     color: white;
-    cursor:pointer
+    cursor: pointer
 }
 
-#captureBtn:hover,
-#saveShareBtn:hover,
-.authenticate-button:hover,
-#captureBtn:focus,
-#saveShareBtn:focus,
-.authenticate-button:focus {
-    opacity: 0.7;
-}
+    #captureBtn:hover,
+    #saveShareBtn:hover,
+    .authenticate-button:hover,
+    #captureBtn:focus,
+    #saveShareBtn:focus,
+    .authenticate-button:focus,
+    .login-button:hover,
+    .login-button:focus{
+        opacity: 0.7;
+    }
 
     #captureBtn:active,
     #saveShareBtn:active,
     .authenticate-button:active {
         opacity: 0.4;
     }
+
+
+.logout-button {
+    font-family: sans-serif;
+    background-color: #A9A9A9;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 20px auto;
+    text-align: center;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    width: fit-content;
+    margin: 20px auto;
+}
+
+[type='color'] {
+    appearance: none;
+    padding: 0;
+    width: 15px;
+    height: 15px;
+    border: none;
+}
+
+[type='color']::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+[type='color']::-webkit-color-swatch {
+    border: none;
+}
+
+.color-picker {
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+    
+
 
 

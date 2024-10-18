@@ -10,6 +10,7 @@ open WebSharper.Capacitor
 open WebSharper.TouchEvents
 open WebSharper.Sitelets
 open WebSharper.UI.Notation
+open System
 
 type IndexTemplate = Template<"wwwroot/index.html", ClientLoad.FromDocument>
 
@@ -17,48 +18,30 @@ type EndPoint =
     | [<EndPoint "/">] Home
     | [<EndPoint "/picdraw">] PicDraw
 
+type Users = {
+    Username: string
+    Password: string
+    PenColor: string
+}    
 
-[<JavaScript; AutoOpen>]
+
+[<JavaScript;AutoOpen>]
 module Logic =
     let canvas() = As<HTMLCanvasElement>(JS.Document.GetElementById("annotationCanvas"))
     let getContext (e: Dom.EventTarget) = As<HTMLCanvasElement>(e).GetContext("2d")
-    let isAuthenticated = Var.Create false
     let toPicDrawPage = Var.Create ""
 
-    let authenticateToast() = 
+    let showToast(text) = 
         Capacitor.Toast.Show(Toast.ShowOptions(
-            text = "Authenticate Successfully",
+            text = text,
             Duration = "short"
+        ))    
+
+    let showAlert(title, message) =
+        Capacitor.Dialog.Alert(Dialog.AlertOptions(
+            Title = title,
+            Message = message
         ))
-
-    let authenticateUser() = promise {
-        try
-            let! checkBioResult = Capacitor.BiometricAuth.CheckBiometry();
-            if(checkBioResult.IsAvailable = false) then
-                printfn("Biometric authentication not available on this device.");
-
-            else      
-                let! _ = Capacitor.BiometricAuth.Authenticate(BiometricAuth.AuthenticateOptions(
-                    Reason = "Please authenticate to use PicDrawApp",
-                    AndroidTitle = "Biometric Authentication",
-                    AndroidSubtitle = "Use your fingerprint to access the app",
-                    AllowDeviceCredential = true
-                ))
-
-                toPicDrawPage := "/#/picdraw"
-                JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore   
-                
-                isAuthenticated := true
-                authenticateToast() |> ignore
-
-        with ex ->
-            let error = ex |> As<BiometricAuth.BiometryErrorType> 
-            printfn($"Authentication failed: {error}")
-            Capacitor.Dialog.Alert(Dialog.AlertOptions(
-                Title = "Alert",
-                Message = $"{error}"
-            ))|> ignore            
-    }
  
     let loadImageOnCanvas (imagePath: string) =
         let img = 
@@ -128,14 +111,84 @@ module Logic =
     
         offsetY
 
-[<JavaScript; AutoOpen>]
+    let USERNAME_KEY = "stored_username"
+    let PASSWORD_KEY = "stored_password"
+
+    let username = Var.Create ""
+    let password = Var.Create ""
+
+    let saveCredentials (username: string, password: string) = promise {
+        Capacitor.Preferences.Set(Preferences.SetOptions(
+            key = USERNAME_KEY,
+            value = username
+        )) |> ignore
+
+        Capacitor.Preferences.Set(Preferences.SetOptions(
+            key = PASSWORD_KEY,
+            value = password
+        )) |> ignore
+    }
+
+    let loadCredentials() = promise {
+        let! savedUsername = Capacitor.Preferences.Get(Preferences.GetOptions(key = USERNAME_KEY))
+        let! savedPassword = Capacitor.Preferences.Get(Preferences.GetOptions(key = PASSWORD_KEY))
+
+        if not (String.IsNullOrEmpty(username.Value)) && not (String.IsNullOrEmpty(password.Value)) then
+            username := savedUsername.Value.Value1
+            password := savedPassword.Value.Value1
+            showToast("Credentials loaded") |> ignore
+    }
+
+    let login() = promise {
+        printfn("Logging in with username and password")
+
+        if not (String.IsNullOrWhiteSpace(username.Value)) && not (String.IsNullOrWhiteSpace(password.Value)) then
+            saveCredentials(username.Value, password.Value) |> ignore
+            toPicDrawPage := "/#/picdraw"
+            JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore 
+        else
+            showAlert("Alert", "Username and Password can not be left empty.") |> ignore
+            
+
+        printfn("User logged in successfully!")
+    }
+
+    let authenticateUser() = promise {
+        try
+            let! checkBioResult = Capacitor.BiometricAuth.CheckBiometry();
+            if (checkBioResult.IsAvailable = false) then
+                printfn("Biometric authentication not available on this device.");
+
+            (*else*)      //
+                Capacitor.BiometricAuth.Authenticate(BiometricAuth.AuthenticateOptions(
+                    Reason = "Please authenticate to use PicDrawApp",
+                    AndroidTitle = "Biometric Authentication",
+                    AndroidSubtitle = "Use your fingerprint to access the app",
+                    AllowDeviceCredential = true
+                )) |> ignore
+
+                loadCredentials()|>ignore
+
+                toPicDrawPage := "/#/picdraw"
+                JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore                   
+                
+
+        with ex ->
+            (*let error = ex |> As<BiometricAuth.BiometryError>*) 
+            printfn($"Authentication failed: {ex}")
+            showAlert("Alert", $"{ex}") |> ignore            
+    }
+        
+
+[<JavaScript;AutoOpen>]
 module Pages = 
     let isDrawing = Var.Create false
     let lastX, lastY = Var.Create 0.0, Var.Create 0.0   
+    let colorStroke = Var.Create ""
 
     let draw (e: Dom.EventTarget, offsetX, offsetY) =
             let ctx = getContext e
-            ctx.StrokeStyle <- "#FF0000" 
+            ctx.StrokeStyle <- colorStroke.Value 
             ctx.LineWidth <- 2.0 
             ctx.BeginPath()
             ctx.MoveTo(lastX.Value, lastY.Value)
@@ -144,8 +197,39 @@ module Pages =
             lastX := offsetX
             lastY := offsetY
 
+    let HomePage() = 
+        IndexTemplate.Home()
+            .Username(username.V)
+            .Password(password.V)
+            .LogIn(fun _ -> 
+                async {
+                    return! login().AsAsync()
+                }
+                |> Async.StartImmediate
+            )
+            .BiometricAuthenticate(fun e -> 
+                e.Event.PreventDefault()
+                username := e.Vars.Username.Value
+                password := e.Vars.Password.Value
+                async {
+                    return! authenticateUser().AsAsync()
+                }
+                |> Async.StartImmediate
+            )      
+            .ToPicDrawPage(toPicDrawPage.V)
+            .Doc()
+
     let PicDrawPage() = 
+        if username.Value = "Got" then
+            colorStroke := "#FF0000" // red
+        else
+            colorStroke :=  "#0000FF" // blue
+
+        showToast("Log in Successfully") |> ignore
+
         IndexTemplate.PicDraw()
+            .UsernamePicDraw(username.V)
+            .PasswordPicDraw(password.V)
             .CaptureBtn(fun _ -> 
                 async {
                     return! takePicture().Then(fun _ -> printfn "Succesfully take or choose a picture").AsAsync()
@@ -212,19 +296,7 @@ module Pages =
                     isDrawing := false
                 )
             )
-            .Doc()    
-
-    let HomePage() = 
-        IndexTemplate.textAuth()
-            .authenticate(fun e -> 
-                e.Event.PreventDefault()
-                async {
-                    return! authenticateUser().AsAsync()
-                }
-                |> Async.StartImmediate
-            )      
-            .ToPicDrawPage(toPicDrawPage.V)
-            .Doc()
+            .Doc()            
 
 [<JavaScript>]
 module Client =   
