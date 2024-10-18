@@ -165,13 +165,16 @@ module Logic =
         showToast("Credentials loaded") |> ignore
     }
 
+    let ToPicDrawPage() = 
+        toPicDrawPage := "/#/picdraw"
+        JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore 
+
     let login() = promise {
         printfn("Logging in with username and password")
 
         if not (String.IsNullOrWhiteSpace(username.Value)) && not (String.IsNullOrWhiteSpace(password.Value)) then
             saveCredentials(username.Value, password.Value) |> ignore
-            toPicDrawPage := "/#/picdraw"
-            JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore 
+            ToPicDrawPage()
         else
             showAlert("Alert", "Username and Password can not be left empty.") |> ignore
     }
@@ -191,7 +194,7 @@ module Logic =
                 )) |> ignore
 
                 loadCredentials()|>ignore  
-                login() |> ignore
+                ToPicDrawPage()
 
         with 
         | exn ->
