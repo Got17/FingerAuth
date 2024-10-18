@@ -18,12 +18,10 @@ type EndPoint =
     | [<EndPoint "/">] Home
     | [<EndPoint "/picdraw">] PicDraw
 
-type Users = {
+type User = {
     Username: string
     Password: string
-    PenColor: string
 }    
-
 
 [<JavaScript;AutoOpen>]
 module Logic =
@@ -31,11 +29,25 @@ module Logic =
     let getContext (e: Dom.EventTarget) = As<HTMLCanvasElement>(e).GetContext("2d")
     let toPicDrawPage = Var.Create ""
 
+    let USERNAME_KEY = "stored_username"
+    let PASSWORD_KEY = "stored_password"
+
+    let username = Var.Create ""
+    let password = Var.Create ""
+
+    let mutable users:seq<User> = Seq.empty
+
+    let preferencesSet(key, value) = 
+        Capacitor.Preferences.Set(Preferences.SetOptions(key = key, value = value))
+
+    let preferencesGet(key) = 
+        Capacitor.Preferences.Get(Preferences.GetOptions(key = key))
+
     let showToast(text) = 
         Capacitor.Toast.Show(Toast.ShowOptions(
             text = text,
             Duration = "short"
-        ))    
+        ))
 
     let showAlert(title, message) =
         Capacitor.Dialog.Alert(Dialog.AlertOptions(
@@ -109,24 +121,37 @@ module Logic =
         let scaleY = intTofloat(canvas.Height) / rect.Height
         let offsetY = (touch.ClientY - rect.Top) * scaleY
     
-        offsetY
+        offsetY    
 
-    let USERNAME_KEY = "stored_username"
-    let PASSWORD_KEY = "stored_password"
+    let saveUsers() = promise {
+        preferencesSet(USERNAME_KEY, JSON.Stringify(users)) |> ignore
+        printfn($"Users saved: {users}")
+    }
+        
 
-    let username = Var.Create ""
-    let password = Var.Create ""
+    let loadUsers() = promise {
+        let! value = preferencesGet(USERNAME_KEY)
+
+        let jsonString = value.Value.Value1
+
+        if not(String.IsNullOrEmpty(jsonString)) then  
+            users <- JSON.Parse(jsonString) |> As<seq<User>>
+            printfn($"Users loaded: {users}")
+        else 
+            printfn("No users found")
+    }       
+        
+    let addUser(username, password) = promise {
+        let newUser: User = { Username = username; Password = password}
+        users <- Seq.append users (Seq.singleton newUser)
+        printfn($"Users added: {users}")
+        saveUsers() |> ignore
+    }       
+
 
     let saveCredentials (username: string, password: string) = promise {
-        Capacitor.Preferences.Set(Preferences.SetOptions(
-            key = USERNAME_KEY,
-            value = username
-        )) |> ignore
-
-        Capacitor.Preferences.Set(Preferences.SetOptions(
-            key = PASSWORD_KEY,
-            value = password
-        )) |> ignore
+        preferencesSet(USERNAME_KEY, username) |> ignore
+        preferencesSet(PASSWORD_KEY, password) |> ignore
     }
 
     let loadCredentials() = promise {
@@ -156,10 +181,10 @@ module Logic =
     let authenticateUser() = promise {
         try
             let! checkBioResult = Capacitor.BiometricAuth.CheckBiometry();
-            if (checkBioResult.IsAvailable = false) then
+            if not(checkBioResult.IsAvailable) then
                 printfn("Biometric authentication not available on this device.");
 
-            (*else*)      //
+            else
                 Capacitor.BiometricAuth.Authenticate(BiometricAuth.AuthenticateOptions(
                     Reason = "Please authenticate to use PicDrawApp",
                     AndroidTitle = "Biometric Authentication",
@@ -174,9 +199,9 @@ module Logic =
                 
 
         with ex ->
-            (*let error = ex |> As<BiometricAuth.BiometryError>*) 
-            printfn($"Authentication failed: {ex}")
-            showAlert("Alert", $"{ex}") |> ignore            
+            let error = ex |> As<BiometricAuth.BiometryError> 
+            printfn($"Authentication failed: {error}")
+            showAlert("Alert", $"{error}") |> ignore            
     }
         
 
