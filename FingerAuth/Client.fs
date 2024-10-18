@@ -35,6 +35,8 @@ module Logic =
     let username = Var.Create ""
     let password = Var.Create ""
 
+    let mutable appListener: PluginListenerHandle = Unchecked.defaultof<_>
+
     let mutable users:seq<User> = Seq.empty
 
     let preferencesSet(key, value) = 
@@ -158,7 +160,6 @@ module Logic =
         let! savedUsername = Capacitor.Preferences.Get(Preferences.GetOptions(key = USERNAME_KEY))
         let! savedPassword = Capacitor.Preferences.Get(Preferences.GetOptions(key = PASSWORD_KEY))
 
-        //if not (String.IsNullOrEmpty(username.Value)) && not (String.IsNullOrEmpty(password.Value)) then
         username := savedUsername.Value.Value1
         password := savedPassword.Value.Value1
         showToast("Credentials loaded") |> ignore
@@ -173,15 +174,11 @@ module Logic =
             JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore 
         else
             showAlert("Alert", "Username and Password can not be left empty.") |> ignore
-            
-        toPicDrawPage := "/#/picdraw"
-        JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore   
-        printfn("User logged in successfully!")
     }
 
     let authenticateUser() = promise {
         try
-            let! checkBioResult = Capacitor.BiometricAuth.CheckBiometry();
+            let! checkBioResult = Capacitor.BiometricAuth.CheckBiometry()
             if not(checkBioResult.IsAvailable) then
                 printfn("Biometric authentication not available on this device.");
 
@@ -196,12 +193,28 @@ module Logic =
                 loadCredentials()|>ignore                   
 
         with 
-        | ex->
-            let error = ex |> As<BiometricAuth.BiometryError> 
-            printfn($"Authentication failed: {error.Message}")
-            showAlert("Alert", $"{error.Message}") |> ignore            
+        | exn ->
+            let error = exn |> As<BiometricAuth.BiometryError>
+            printfn($"Unexpected error: {exn.Message}")
+            showAlert($"{error.Message}", $"{error.Code}") |> ignore     
+    }        
+
+    let updateBiometryInfo(info: BiometricAuth.CheckBiometryResult): unit =
+        printfn($"updateBiometryInfo {info}")
+
+    let resumeAuthentication() = promise {
+        let! checkBioResult = Capacitor.BiometricAuth.CheckBiometry()
+        updateBiometryInfo(checkBioResult)
+
+        try 
+            let! resumeListener = Capacitor.BiometricAuth.AddResumeListener(updateBiometryInfo)
+            appListener <- resumeListener
+        with
+        | exn ->
+            let error = exn |> As<BiometricAuth.BiometryError>
+            printfn($"Unexpected error: {exn.Message}")
+            showAlert($"{error.Message}", $"{error.Code}") |> ignore  
     }
-        
 
 [<JavaScript;AutoOpen>]
 module Pages = 
@@ -221,6 +234,11 @@ module Pages =
             lastY := offsetY
 
     let HomePage() = 
+        async {
+            return! resumeAuthentication().AsAsync()
+        }
+        |> Async.StartImmediate
+
         IndexTemplate.Home()
             .Username(username.V)
             .Password(password.V)

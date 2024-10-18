@@ -59,22 +59,19 @@ a {
     cursor: pointer
 }
 
-    #captureBtn:hover,
+    /*#captureBtn:hover,
     #saveShareBtn:hover,
-    .authenticate-button:hover,
     #captureBtn:focus,
-    #saveShareBtn:focus,
-    .authenticate-button:focus,
+    #saveShareBtn:focus
     .login-button:hover,
     .login-button:focus{
         opacity: 0.7;
     }
 
     #captureBtn:active,
-    #saveShareBtn:active,
-    .authenticate-button:active {
+    #saveShareBtn:active {
         opacity: 0.4;
-    }
+    }*/
 
 
 .logout-button {
