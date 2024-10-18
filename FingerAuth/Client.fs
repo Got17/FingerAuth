@@ -220,7 +220,7 @@ module Logic =
 module Pages = 
     let isDrawing = Var.Create false
     let lastX, lastY = Var.Create 0.0, Var.Create 0.0   
-    let colorStroke = Var.Create ""
+    let colorStroke = Var.Create "#ff0000"
 
     let draw (e: Dom.EventTarget, offsetX, offsetY) =
             let ctx = getContext e
@@ -261,16 +261,11 @@ module Pages =
             .Doc()
 
     let PicDrawPage() = 
-        if username.Value = "Got" then
-            colorStroke := "#FF0000" // red
-        else
-            colorStroke :=  "#0000FF" // blue
-
         showToast("Log in Successfully") |> ignore
 
         IndexTemplate.PicDraw()
-            .UsernamePicDraw(username.V)
-            .PasswordPicDraw(password.V)
+            .PenColor(colorStroke)
+            .ColorLabel(colorStroke.View)
             .CaptureBtn(fun _ -> 
                 async {
                     return! takePicture().Then(fun _ -> printfn "Succesfully take or choose a picture").AsAsync()

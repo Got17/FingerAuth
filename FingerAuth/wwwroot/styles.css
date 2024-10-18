@@ -1,7 +1,10 @@
 body {
-    background-color: #242424;
-    color: whitesmoke;
-    font-family: sans-serif
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    min-height: 100vh;
+    padding: 10px;
 }
 
 a {
@@ -10,41 +13,52 @@ a {
 }
 
 .pic-draw-header {
-    display: block;
-    font-size: 2em;
-    margin-top: 0.67em;
-    margin-bottom: 0.67em;
-    margin-left: 0;
-    margin-right: 0;
-    font-weight: bold;
+    text-align: center;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #0f43f1;
+    text-decoration: none;
 }
 
-#main {
-    display: flex;
-    flex-direction: column;
+#text {
+    background: transparent;
+    padding: 20px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 400px;
 }
 
-.canvas-container {
-    display: flex;
-    justify-content: center;
-    align-content: center;
-    margin: 15px;
-    
+.authenticate-text,
+.choose-color-text {
+    text-align: center;
+    font-size: 1.2rem;
+    margin-bottom: 20px;
+    color: #333;
 }
 
-.authenticate-text {
-    display: block;
-    font-size: 1.17em;
-    margin-top: 1em;
-    margin-bottom: 1em;
-    margin-left: 0;
-    margin-right: 0;
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.login-button, .authenticate-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #0f43f1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 10px 0;
 }
 
 #captureBtn,
-#saveShareBtn,
-.authenticate-button,
-.login-button {
+#saveShareBtn {
     font-size: 18px;
     font-family: sans-serif;
     letter-spacing: 2px;
@@ -59,20 +73,31 @@ a {
     cursor: pointer
 }
 
-    /*#captureBtn:hover,
-    #saveShareBtn:hover,
-    #captureBtn:focus,
-    #saveShareBtn:focus
-    .login-button:hover,
-    .login-button:focus{
-        opacity: 0.7;
-    }
+#main {
+    background: transparent;
+    padding: 20px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 400px;
+}
 
-    #captureBtn:active,
-    #saveShareBtn:active {
-        opacity: 0.4;
-    }*/
+.choose-color-text {
+    margin-bottom:0;
+}
 
+.color-picker {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.canvas-container {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    margin: 15px;
+}
 
 .logout-button {
     font-family: sans-serif;
@@ -107,12 +132,7 @@ a {
     border: none;
 }
 
-.color-picker {
-    display: inline-block;
-    padding: 10px 15px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-}
+
     
 
 

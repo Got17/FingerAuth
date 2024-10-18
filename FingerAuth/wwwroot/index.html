@@ -16,6 +16,7 @@
 <body>
     <a class="pic-draw-header" href="/#">PicDraw App</a>
     <div ws-replace="PageContent"></div>
+    <!--Home Page-->
     <div id="text" ws-children-template="Home">
         <p class="authenticate-text">Please authenticate</p>
         <input id="username" placeholder="Username" ws-var="Username" /><br />
@@ -23,15 +24,16 @@
         <button role="button" ws-onclick="LogIn" href="${ToPicDrawPage}" class="login-button">Log in</button>
         <button role="button" ws-onclick="BiometricAuthenticate" href="${ToPicDrawPage}" class="authenticate-button">Authorize with Biometric</button>
     </div>
+    <!--PicDraw Page-->
     <div id="main" ws-children-template="PicDraw">
-        <p ws-hole="UsernamePicDraw"></p>
-        <p ws-hole="PasswordPicDraw"></p>
-        <div>Please choose your preferred color. </div>
-        <p class="color-picker">
-            <label for="colorPicker">
-                <input type="color" value="#1DB8CE" id="colorPicker">
-            </label>
+        <p class="choose-color-text">Choose your pen color. 
+            <span class="color-picker">
+                <label for="colorPicker">
+                    <input type="color" value="#1DB8CE" id="colorPicker" ws-var="PenColor"> ${ColorLabel}
+                </label>
+            </span>
         </p>
+        <br />
         <div class="capture-button">
             <button role="button" id="captureBtn" ws-onclick="CaptureBtn">Capture Image</button>
         </div>
