@@ -193,15 +193,13 @@ module Logic =
                     AllowDeviceCredential = true
                 )) |> ignore
 
-                loadCredentials()|>ignore                 
-                
-                
-                
+                loadCredentials()|>ignore                   
 
-        with ex ->
+        with 
+        | ex->
             let error = ex |> As<BiometricAuth.BiometryError> 
-            printfn($"Authentication failed: {error}")
-            showAlert("Alert", $"{error}") |> ignore            
+            printfn($"Authentication failed: {error.Message}")
+            showAlert("Alert", $"{error.Message}") |> ignore            
     }
         
 
