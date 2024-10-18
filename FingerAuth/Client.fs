@@ -194,7 +194,7 @@ module Logic =
                 )) |> ignore
 
                 loadCredentials()|>ignore  
-                ToPicDrawPage()
+                (*ToPicDrawPage()*)
 
         with 
         | exn ->
