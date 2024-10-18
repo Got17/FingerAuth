@@ -162,7 +162,7 @@ module Logic =
 
         username := savedUsername.Value.Value1
         password := savedPassword.Value.Value1
-        showToast("Credentials loaded") |> ignore
+        //showToast("Credentials loaded") |> ignore
     }
 
     let ToPicDrawPage() = 
