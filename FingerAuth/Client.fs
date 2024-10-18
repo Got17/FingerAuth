@@ -220,6 +220,11 @@ module Logic =
             showAlert($"{error.Message}", $"{error.Code}") |> ignore  
     }
 
+    (*let resumeEventListenner() = promise {
+        let resume() = authenticateUser()
+        Capacitor.App.AddListener("resume", )
+    }*)
+
 [<JavaScript;AutoOpen>]
 module Pages = 
     let isDrawing = Var.Create false
