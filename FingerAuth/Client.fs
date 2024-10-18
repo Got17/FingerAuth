@@ -158,10 +158,10 @@ module Logic =
         let! savedUsername = Capacitor.Preferences.Get(Preferences.GetOptions(key = USERNAME_KEY))
         let! savedPassword = Capacitor.Preferences.Get(Preferences.GetOptions(key = PASSWORD_KEY))
 
-        if not (String.IsNullOrEmpty(username.Value)) && not (String.IsNullOrEmpty(password.Value)) then
-            username := savedUsername.Value.Value1
-            password := savedPassword.Value.Value1
-            showToast("Credentials loaded") |> ignore
+        //if not (String.IsNullOrEmpty(username.Value)) && not (String.IsNullOrEmpty(password.Value)) then
+        username := savedUsername.Value.Value1
+        password := savedPassword.Value.Value1
+        showToast("Credentials loaded") |> ignore
     }
 
     let login() = promise {
@@ -174,7 +174,8 @@ module Logic =
         else
             showAlert("Alert", "Username and Password can not be left empty.") |> ignore
             
-
+        toPicDrawPage := "/#/picdraw"
+        JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore   
         printfn("User logged in successfully!")
     }
 
@@ -192,10 +193,9 @@ module Logic =
                     AllowDeviceCredential = true
                 )) |> ignore
 
-                loadCredentials()|>ignore
-
-                toPicDrawPage := "/#/picdraw"
-                JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore                   
+                loadCredentials()|>ignore                 
+                
+                
                 
 
         with ex ->
