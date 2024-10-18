@@ -5,6 +5,16 @@ body {
     background-color: #f4f4f4;
     min-height: 100vh;
     padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+* {
+    box-sizing: border-box;
 }
 
 a {
@@ -22,10 +32,9 @@ a {
 
 #text {
     background: transparent;
-    padding: 20px;
+    padding: 15px;
     border-radius: 10px;
     width: 100%;
-    max-width: 400px;
 }
 
 .authenticate-text,
@@ -35,6 +44,13 @@ a {
     margin-bottom: 20px;
     color: #333;
 }
+.login-button-container {
+    display:flex;
+    flex-direction:column;
+    justify-content: center;
+    align-items:center;
+    width: 100%
+}
 
 input {
     width: 100%;
@@ -43,6 +59,7 @@ input {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 1rem;
+    box-sizing: border-box;
 }
 
 .login-button, .authenticate-button {
@@ -54,7 +71,7 @@ input {
     border-radius: 5px;
     font-size: 1rem;
     cursor: pointer;
-    margin: 10px 0;
+    margin: 10px 0px;
 }
 
 #captureBtn,
@@ -75,10 +92,9 @@ input {
 
 #main {
     background: transparent;
-    padding: 20px;
+    padding: 15px;
     border-radius: 10px;
     width: 100%;
-    max-width: 400px;
 }
 
 .choose-color-text {
