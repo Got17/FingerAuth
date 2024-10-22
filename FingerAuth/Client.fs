@@ -192,9 +192,6 @@ module Logic =
                     AndroidSubtitle = "Use your fingerprint to access the app",
                     AllowDeviceCredential = true
                 )) |> ignore
- 
-                Async.Sleep(5000) |> Async.RunSynchronously
-                ToPicDrawPage()
 
         with 
         | exn ->
@@ -265,6 +262,7 @@ module Pages =
                     return! authenticateUser().AsAsync()
                 }
                 |> Async.StartImmediate
+                ToPicDrawPage()
             )      
             .ToPicDrawPage(toPicDrawPage.V)
             .Doc()
