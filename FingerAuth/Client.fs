@@ -193,6 +193,7 @@ module Logic =
                     AllowDeviceCredential = true
                 )) |> ignore
  
+                loadCredentials() |> ignore
                 ToPicDrawPage()
 
         with 
