@@ -192,9 +192,8 @@ module Logic =
                     AndroidSubtitle = "Use your fingerprint to access the app",
                     AllowDeviceCredential = true
                 )) |> ignore
-
-                loadCredentials()|>ignore  
-                (*ToPicDrawPage()*)
+ 
+                ToPicDrawPage()
 
         with 
         | exn ->
