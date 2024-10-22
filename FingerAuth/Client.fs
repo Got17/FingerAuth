@@ -193,7 +193,7 @@ module Logic =
                     AllowDeviceCredential = true
                 )) |> ignore
  
-                loadCredentials() |> ignore
+                Async.Sleep(5000) |> Async.RunSynchronously
                 ToPicDrawPage()
 
         with 
@@ -201,7 +201,7 @@ module Logic =
             let error = exn |> As<BiometricAuth.BiometryError>
             printfn($"Unexpected error: {exn.Message}")
             showAlert($"{error.Message}", $"{error.Code}") |> ignore     
-    }        
+    }     
 
     let updateBiometryInfo(info: BiometricAuth.CheckBiometryResult): unit =
         printfn($"updateBiometryInfo {info}")
