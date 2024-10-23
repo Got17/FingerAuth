@@ -4,6 +4,7 @@ open Microsoft.Extensions.Hosting
 open Microsoft.AspNetCore.Http
 open Microsoft.Extensions.DependencyInjection
 open WebSharper.AspNetCore
+open System.Threading.Tasks
 open FingerAuth
 
 [<EntryPoint>]
@@ -29,7 +30,7 @@ let main args =
         .UseDefaultFiles()
         .UseStaticFiles()
         //Enable if you want to make RPC calls to server
-        //.UseWebSharperRemoting()
+        .UseWebSharperRemoting(fun config -> ())
     |> ignore 
        
     app.Run()

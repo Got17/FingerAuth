@@ -10,5 +10,14 @@ export default defineConfig({
   },
   build: {
     outDir: "dist"
-  }
+  },
+    server: {
+        proxy: {
+            '/Server': {
+                target: 'https://localhost:5000',
+                changeOrigin: true,
+                secure: false
+            }
+        }
+    }
 })

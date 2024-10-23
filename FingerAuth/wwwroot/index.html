@@ -18,15 +18,18 @@
     <div ws-replace="PageContent"></div>
     <!--Home Page-->
     <div id="text" ws-children-template="Home">
-        <p class="authenticate-text">Please authenticate</p>
-        <input id="username" placeholder="Username" ws-var="Username" /><br />
-        <input id="password" type="password" placeholder="Password" ws-var="Password" />
-        <div class="login-button-container">
-            <button role="button" ws-onclick="LogIn" href="${ToPicDrawPage}" class="login-button">Log in</button>
-        </div>
+        <form id="loginForm" ws-onsubmit="LogIn" action="javascript:void(0)">
+            <p class="authenticate-text">Please authenticate</p>
+            <input id="username" placeholder="Username" ws-var="Username" /><br />
+            <input id="password" type="password" placeholder="Password" ws-var="Password" />
+            <div class="login-button-container">
+                <button role="button" class="login-button">Log in</button>
+            </div>
+        </form>
         <div class="login-button-container">
             <button role="button" ws-onclick="BiometricAuthenticate" href="${ToPicDrawPage}" class="authenticate-button">Authorize with Biometric</button>
         </div>
+
     </div>
     <!--PicDraw Page-->
     <div id="main" ws-children-template="PicDraw">

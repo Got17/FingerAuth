@@ -1,6 +1,7 @@
 namespace FingerAuth
 
 open WebSharper
+open WebSharper.Remoting
 open WebSharper.JavaScript
 open WebSharper.UI
 open WebSharper.UI.Html
@@ -12,16 +13,11 @@ open WebSharper.Sitelets
 open WebSharper.UI.Notation
 open System
 
-type IndexTemplate = Template<"wwwroot/index.html", ClientLoad.FromDocument>
+type IndexTemplate = Template<"wwwroot/index.html", ClientLoad.FromDocument, ServerLoad.WhenChanged>
 
 type EndPoint = 
     | [<EndPoint "/">] Home
     | [<EndPoint "/picdraw">] PicDraw
-
-type User = {
-    Username: string
-    Password: string
-}    
 
 [<JavaScript;AutoOpen>]
 module Logic =
@@ -36,8 +32,6 @@ module Logic =
     let password = Var.Create ""
 
     let mutable appListener: PluginListenerHandle = Unchecked.defaultof<_>
-
-    let mutable users:seq<User> = Seq.empty
 
     let preferencesSet(key, value) = 
         Capacitor.Preferences.Set(Preferences.SetOptions(key = key, value = value))
@@ -123,33 +117,7 @@ module Logic =
         let scaleY = intTofloat(canvas.Height) / rect.Height
         let offsetY = (touch.ClientY - rect.Top) * scaleY
     
-        offsetY    
-
-    let saveUsers() = promise {
-        preferencesSet(USERNAME_KEY, JSON.Stringify(users)) |> ignore
-        printfn($"Users saved: {users}")
-    }
-        
-
-    let loadUsers() = promise {
-        let! value = preferencesGet(USERNAME_KEY)
-
-        let jsonString = value.Value.Value1
-
-        if not(String.IsNullOrEmpty(jsonString)) then  
-            users <- JSON.Parse(jsonString) |> As<seq<User>>
-            printfn($"Users loaded: {users}")
-        else 
-            printfn("No users found")
-    }       
-        
-    let addUser(username, password) = promise {
-        let newUser: User = { Username = username; Password = password}
-        users <- Seq.append users (Seq.singleton newUser)
-        printfn($"Users added: {users}")
-        saveUsers() |> ignore
-    }       
-
+        offsetY   
 
     let saveCredentials (username: string, password: string) = promise {
         preferencesSet(USERNAME_KEY, username) |> ignore
@@ -157,8 +125,8 @@ module Logic =
     }
 
     let loadCredentials() = promise {
-        let! savedUsername = Capacitor.Preferences.Get(Preferences.GetOptions(key = USERNAME_KEY))
-        let! savedPassword = Capacitor.Preferences.Get(Preferences.GetOptions(key = PASSWORD_KEY))
+        let! savedUsername = preferencesGet(USERNAME_KEY)
+        let! savedPassword = preferencesGet(PASSWORD_KEY)
 
         username := savedUsername.Value.Value1
         password := savedPassword.Value.Value1
@@ -170,14 +138,27 @@ module Logic =
         JS.Window.Location.Replace(toPicDrawPage.Value) |> ignore 
 
     let login() = promise {
-        printfn("Logging in with username and password")
-
         if not (String.IsNullOrWhiteSpace(username.Value)) && not (String.IsNullOrWhiteSpace(password.Value)) then
-            saveCredentials(username.Value, password.Value) |> ignore
-            ToPicDrawPage()
+            try 
+                let! isValid = Server.verifyUser(username.Value, password.Value)
+                if isValid then
+                    saveCredentials(username.Value, password.Value) |> ignore
+                    ToPicDrawPage()
+                else
+                    showAlert("Alert", "Invalid username or password.") |> ignore
+            with ex ->
+                // Log the error to the browser console
+                printfn($"Error during login: {ex.Message}")
+                showAlert("Error", $"An error occurred during login: {ex.Message}") |> ignore
         else
-            showAlert("Alert", "Username and Password can not be left empty.") |> ignore
+            showAlert("Alert", "Username and password cannot be left empty.") |> ignore
     }
+
+    let testProxy () = promise {
+            let! result = Server.testEndpoint()
+
+            printfn($"{result}")
+        }
 
     let authenticateUser() = promise {
         try
@@ -192,6 +173,8 @@ module Logic =
                     AndroidSubtitle = "Use your fingerprint to access the app",
                     AllowDeviceCredential = true
                 )) |> ignore
+
+                ToPicDrawPage()
 
         with 
         | exn ->
@@ -245,6 +228,11 @@ module Pages =
         }
         |> Async.StartImmediate
 
+        async {
+            return! testProxy().AsAsync()
+        }
+        |> Async.StartImmediate
+
         IndexTemplate.Home()
             .Username(username.V)
             .Password(password.V)
@@ -262,7 +250,7 @@ module Pages =
                     return! authenticateUser().AsAsync()
                 }
                 |> Async.StartImmediate
-                ToPicDrawPage()
+                
             )      
             .ToPicDrawPage(toPicDrawPage.V)
             .Doc()
@@ -348,7 +336,7 @@ module Client =
     let currentPage = Router.InstallHash Home router
 
     [<SPAEntryPoint>]
-    let Main () =        
+    let Main () =   
         let renderInnerPage (currentPage: Var<EndPoint>) =
             currentPage.View.Map (fun endpoint ->
                 match endpoint with        
