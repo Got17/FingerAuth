@@ -95,11 +95,16 @@ form {
     line-height: 57px;
 }
 
+.forgot-container {
+    width: 100%;
+    display:flex;
+    justify-content: right;
+}
+
 .forgot-password {
     font-size: 14px;
     color: #666;
     text-align: right;
-    width: 100%;
     margin-bottom: 20px;
     text-decoration: none;
 }
@@ -120,6 +125,10 @@ form {
     margin: 10px 0px;
     outline: none;
     font-weight: 500;
+}
+
+.authenticate-button {
+    opacity: 0.75;
 }
 
 .signup-link {
