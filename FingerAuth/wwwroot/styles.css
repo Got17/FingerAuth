@@ -113,7 +113,8 @@ form {
     text-decoration: underline;
 }
 
-.login-button, .authenticate-button {
+.login-button, .authenticate-button,
+.sign-up-button {
     width: 100%;
     height: 40px;
     background-color: #0f43f1;

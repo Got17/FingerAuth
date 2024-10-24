@@ -15,8 +15,9 @@
 </head>
 <body>
     <div ws-replace="PageContent"></div>
-    <!--Home Page-->
-    <div id="Home" ws-children-template="Home">
+
+    <!--Login Page-->
+    <div id="Login" ws-children-template="Login">
         <div class="login-container container">
             <form id="loginForm" ws-onsubmit="LogIn" action="javascript:void(0)">
                 <div class="header">
@@ -25,13 +26,13 @@
 
                 <div class="input-container">
                     <span class="icon"><ion-icon name="person-circle-outline"></ion-icon></span>
-                    <input id="username" class="text" ws-var="Username" required/>
+                    <input id="username" class="text" ws-var="Username" required />
                     <label for="username" class="text">Username</label>
                 </div>
 
                 <div class="input-container">
                     <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
-                    <input id="password" class="text" type="password" ws-var="Password" required/>
+                    <input id="password" class="text" type="password" ws-var="Password" required />
                     <label for="password" class="text">Password</label>
                 </div>
 
@@ -41,21 +42,52 @@
 
                 <button type="submit" class="login-button text">Login</button>
 
-                <button role="button" ws-onclick="BiometricAuthenticate" href="${ToPicDrawPage}" class="authenticate-button text">Authorize with Biometric
+                <button role="button" ws-onclick="BiometricAuthenticate" href="${ToPicDrawPage}" class="authenticate-button text">
+                    Authorize with Biometric
                     <ion-icon name="finger-print-outline"></ion-icon>
                 </button>
 
                 <div class="signup-link text">
-                    <p>Don't have an account? <a href="#">SIGN UP</a></p>
+                    <p>Don't have an account? <a href="/#/signup">Sign Up</a></p>
                 </div>
             </form>
         </div>
     </div>
+
+    <!--SignUp Page-->
+    <div id="SignUp" ws-children-template="SignUp">
+        <div class="signup-container container">
+            <form id="signUpForm" ws-onsubmit="SignUp" action="javascript:void(0)">
+                <div class="header">
+                    <a class="header-text sign-up-text" href="/#">Sign Up</a>
+                </div>
+
+                <div class="input-container">
+                    <span class="icon"><ion-icon name="person-circle-outline"></ion-icon></span>
+                    <input id="username" class="text" ws-var="Username" required />
+                    <label for="username" class="text">Username</label>
+                </div>
+
+                <div class="input-container">
+                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <input id="password" class="text" type="password" ws-var="Password" required />
+                    <label for="password" class="text">Password</label>
+                </div>
+
+                <button type="submit" class="sign-up-button text">Sign Up</button>
+
+                <div class="signup-link text">
+                    <p>Already have an account? <a href="/#">Login</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!--PicDraw Page-->
     <div id="main" ws-children-template="PicDraw">
         <div class="draw-container container">
             <div class="header">
-                <a class="header-text pic-draw-text" href="/#">PicDraw App</a>
+                <a class="header-text pic-draw-text" href="/#/picdraw">PicDraw App</a>
             </div>
 
             <div>
