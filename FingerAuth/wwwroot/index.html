@@ -14,52 +14,80 @@
     <script type="module" src="Content/FingerAuth.head.js"></script>
 </head>
 <body>
-    <a class="pic-draw-header" href="/#">PicDraw App</a>
     <div ws-replace="PageContent"></div>
     <!--Home Page-->
-    <div id="text" ws-children-template="Home">
-        <form id="loginForm" ws-onsubmit="LogIn" action="javascript:void(0)">
-            <p class="authenticate-text">Please authenticate</p>
-            <input id="username" placeholder="Username" ws-var="Username" /><br />
-            <input id="password" type="password" placeholder="Password" ws-var="Password" />
-            <div class="login-button-container">
-                <button role="button" class="login-button">Log in</button>
-            </div>
-        </form>
-        <div class="login-button-container">
-            <button role="button" ws-onclick="BiometricAuthenticate" href="${ToPicDrawPage}" class="authenticate-button">Authorize with Biometric</button>
-        </div>
+    <div id="Home" ws-children-template="Home">
+        <div class="login-container container">
+            <form id="loginForm" ws-onsubmit="LogIn" action="javascript:void(0)">
+                <div class="header">
+                    <a class="header-text login-text" href="/#">Login</a>
+                </div>
 
+                <div class="input-container">
+                    <span class="icon"><ion-icon name="person-circle-outline"></ion-icon></span>
+                    <input id="username" class="text" ws-var="Username" required/>
+                    <label for="username" class="text">Username</label>
+                </div>
+
+                <div class="input-container">
+                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <input id="password" class="text" type="password" ws-var="Password" required/>
+                    <label for="password" class="text">Password</label>
+                </div>
+
+                <a href="#" class="forgot-password text">Forgot password?</a>
+
+                <button type="submit" class="login-button text">Login</button>
+
+                <button role="button" ws-onclick="BiometricAuthenticate" href="${ToPicDrawPage}" class="authenticate-button text">Authorize with Biometric
+                    <ion-icon name="finger-print-outline"></ion-icon>
+                </button>
+
+                <div class="signup-link text">
+                    <p>Don't have an account? <a href="#">SIGN UP</a></p>
+                </div>
+            </form>
+        </div>
     </div>
     <!--PicDraw Page-->
     <div id="main" ws-children-template="PicDraw">
-        <p class="choose-color-text">Choose your pen color. 
-            <span class="color-picker">
-                <label for="colorPicker">
-                    <input type="color" value="#1DB8CE" id="colorPicker" ws-var="PenColor"> ${ColorLabel}
-                </label>
-            </span>
-        </p>
-        <br />
-        <div class="capture-button">
+        <div class="draw-container container">
+            <div class="header">
+                <a class="header-text pic-draw-text" href="/#">PicDraw App</a>
+            </div>
+
+            <div>
+                <p class="choose-color-text">
+                    Choose your pen color.
+                    <span class="color-picker">
+                        <label for="colorPicker">
+                            <input type="color" value="#1DB8CE" id="colorPicker" ws-var="PenColor"> ${ColorLabel}
+                        </label>
+                    </span>
+                </p>
+            </div>
+
             <button role="button" id="captureBtn" ws-onclick="CaptureBtn">Capture Image</button>
-        </div>
-        <br />
-        <div class="canvas-container">
-            <canvas id="annotationCanvas" width="300" height="400" ws-hole="canvas"
-                    ws-onmouseDown="canvasMouseDown" ws-onmouseup="canvasMouseUp"
-                    ws-onmouseout="canvasMouseOut" ws-onmousemove="canvasMouseMove"
-                    ws-onafterrender="canvasInit"></canvas>
-        </div>
-        <div class="save-share-button">
+
+            <br />
+            <div class="canvas-container">
+                <canvas id="annotationCanvas" width="300" height="400" ws-hole="canvas"
+                        ws-onmouseDown="canvasMouseDown" ws-onmouseup="canvasMouseUp"
+                        ws-onmouseout="canvasMouseOut" ws-onmousemove="canvasMouseMove"
+                        ws-onafterrender="canvasInit"></canvas>
+            </div>
+
             <button role="button" id="saveShareBtn" ws-onclick="SaveShareBtn">Save & Share</button>
-        </div>
-        <div class="logout-container">
-            <a role="button" ws-onclick="LogOut" href="${ToHomePage}" class="logout-button">Log out</a>
+
+            <div class="logout-container">
+                <a role="button" ws-onclick="LogOut" href="${ToHomePage}" class="logout-button">Log out</a>
+            </div>
         </div>
     </div>
 
     <script type="module" src="Content/FingerAuth.min.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <script type="module"
             src="https://unpkg.com/@ionic/pwa-elements@latest/dist/ionicpwaelements/ionicpwaelements.esm.js"></script>
     <script nomodule

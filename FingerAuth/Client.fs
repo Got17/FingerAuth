@@ -140,12 +140,12 @@ module Logic =
     let login() = promise {
         if not (String.IsNullOrWhiteSpace(username.Value)) && not (String.IsNullOrWhiteSpace(password.Value)) then
             try 
-                let! isValid = Server.verifyUser(username.Value, password.Value)
-                if isValid then
-                    saveCredentials(username.Value, password.Value) |> ignore
-                    ToPicDrawPage()
-                else
-                    showAlert("Alert", "Invalid username or password.") |> ignore
+                //let! isValid = Server.verifyUser(username.Value, password.Value)
+                //if isValid then
+                saveCredentials(username.Value, password.Value) |> ignore
+                ToPicDrawPage()
+                //else
+                    //showAlert("Alert", "Invalid username or password.") |> ignore
             with ex ->
                 // Log the error to the browser console
                 printfn($"Error during login: {ex.Message}")
@@ -256,7 +256,7 @@ module Pages =
             .Doc()
 
     let PicDrawPage() = 
-        showToast("Log in Successfully") |> ignore
+        showToast("Login Successfully") |> ignore
 
         IndexTemplate.PicDraw()
             .PenColor(colorStroke)

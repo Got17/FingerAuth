@@ -62,6 +62,6 @@ module Server =
             with ex ->
                 //Log the error to the server console
                 printfn $"Error during user verification: {ex.Message}"
-                return false // Return false or an appropriate response if there's an error
+                return false
         }
 
