@@ -14,9 +14,8 @@ export default defineConfig({
     server: {
         proxy: {
             '/Server': {
-                target: 'https://localhost:5000',
-                changeOrigin: true,
-                secure: false
+                target: 'authapp.intellifactorylabs.com',
+                changeOrigin: true
             }
         }
     }
