@@ -1,6 +1,7 @@
 ﻿namespace FingerAuth
 
 open WebSharper
+open WebSharper.Remoting
 open System.IO
 open System.Security.Cryptography
 open System.Text
@@ -21,7 +22,7 @@ module Server =
 
     let usersFilePath = "src/users.txt"
 
-    [<Rpc>]
+    [<Rpc; RemotingProvider(typeof<SafeRemotingProvider>)>]
     let saveUser (username: string, password: string) =
         async {
             try
@@ -54,29 +55,27 @@ module Server =
                 return "Error during registration"
         }
     
-    [<Rpc>]
+    [<Rpc; RemotingProvider(typeof<SafeRemotingProvider>)>]
+    //[<Rpc>]
     let verifyUser (username: string, password: string) =
         async {
             try
                 let passwordHash = password
                 let users = File.ReadAllLines(usersFilePath)
 
-                // Print each line to see what the file actually contains
-                users |> Array.iter (fun line -> printfn $"Read line from file: '{line}'")
+                // Debugging logs
+                printfn $"Incoming verifyUser request with Username: {username}, Password: {password}"
+                printfn $"Read users from file: {users}"
 
                 let matchingUser = 
                     users 
                     |> Seq.tryFind (fun line -> 
-                        // Print the current line for debugging
-                        printfn $"Processing line: '{line}'"
                         let parts = line.Split(',')
-
-                        // Check if parts array is valid
+                        printfn $"Processing line: '{line}'"
                         if parts.Length >= 2 then
                             printfn($"username: {parts.[0]}, password: {parts.[1]}")
                             parts.[0] = username && parts.[1] = passwordHash
                         else
-                            // Log invalid lines
                             printfn "Invalid line format or empty line."
                             false
                     )
@@ -93,5 +92,6 @@ module Server =
                 printfn $"Error during user verification: {ex.Message}"
                 return false
         }
+
 
 

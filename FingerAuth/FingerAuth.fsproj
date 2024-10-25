@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+	<Compile Include="src\RemotingProvider.fs" />
 	<Resource Include="src\users.txt">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</Resource>

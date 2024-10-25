@@ -80,7 +80,7 @@ module AuthLogic =
             if not(checkBioResult.IsAvailable) then
                 printfn("Biometric authentication not available on this device.");
 
-            //else
+            else
                 Capacitor.BiometricAuth.Authenticate(BiometricAuth.AuthenticateOptions(
                     Reason = "Please authenticate to use PicDrawApp",
                     AndroidTitle = "Biometric Authentication",

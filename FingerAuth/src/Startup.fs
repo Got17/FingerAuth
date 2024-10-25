@@ -16,6 +16,18 @@ let main args =
         .AddCookie("WebSharper", fun options -> ())
     |> ignore
 
+    builder.Services.AddCors(fun options ->
+        options.AddPolicy("CorsPolicy", fun policy ->
+            policy
+                .WithOrigins("https://localhost:5173", "https://authapp.intellifactorylabs.com")
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials()
+                //.SetIsOriginAllowed(fun _ -> true) // Allow all origins - for testing purposes only
+                |> ignore
+        )
+    ) |> ignore
+
     let app = builder.Build()
 
     // Configure the HTTP request pipeline.
@@ -26,6 +38,7 @@ let main args =
         |> ignore
     
     app.UseHttpsRedirection()
+        .UseCors("CorsPolicy")
         .UseDefaultFiles()
         .UseStaticFiles()
         //Enable if you want to make RPC calls to server
