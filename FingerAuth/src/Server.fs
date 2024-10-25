@@ -53,7 +53,7 @@ module Server =
                 printfn $"Error during user registration: {ex.Message}"
                 return "Error during registration"
         }
-
+    
     [<Rpc>]
     let verifyUser (username: string, password: string) =
         async {

@@ -101,7 +101,7 @@
                 </p>
             </div>
 
-            <button role="button" id="captureBtn" ws-onclick="CaptureBtn">Capture Image</button>
+            <button role="button" id="captureBtn" class="capture-button text" ws-onclick="CaptureBtn">Capture Image</button>
 
             <br />
             <div class="canvas-container">
@@ -111,10 +111,10 @@
                         ws-onafterrender="canvasInit"></canvas>
             </div>
 
-            <button role="button" id="saveShareBtn" ws-onclick="SaveShareBtn">Save & Share</button>
+            <button role="button" id="saveShareBtn" class="save-share-button text" ws-onclick="SaveShareBtn">Save & Share</button>
 
             <div class="logout-container">
-                <a role="button" ws-onclick="LogOut" href="${ToHomePage}" class="logout-button">Log out</a>
+                <a role="button" ws-onclick="LogOut" href="${ToHomePage}" class="logout-button text">Log out</a>
             </div>
         </div>
     </div>
