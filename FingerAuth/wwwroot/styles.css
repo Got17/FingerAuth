@@ -18,7 +18,7 @@ a {
     color: whitesmoke;
 }
 
-.login-container{
+.login-container, .signup-container {
     position: relative;
     display: flex;
     justify-content: center;
