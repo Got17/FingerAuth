@@ -1,5 +1,16 @@
 {
   "appId": "authapp.intellifactorylabs.com",
   "appName": "AuthApp",
-  "webDir": "wwwroot/dist"
+  "webDir": "wwwroot/dist",
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  },
+  "server": {
+    "hostname": "authapp.intellifactorylabs.com",
+    "allowNavigation": [
+      "authapp.intellifactorylabs.com"
+    ]
+  }
 }
